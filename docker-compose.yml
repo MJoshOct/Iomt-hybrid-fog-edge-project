@@ -1,0 +1,70 @@
+version: "3.8"
+
+services:
+
+  #FOG LAYER
+  fog:
+    build:
+      context: ./fog               
+      dockerfile: Dockerfile       
+    container_name: fog_node
+    ports:
+      - "5001:5001"
+    volumes:
+      - fog_db:/app                
+    networks:
+      - iomt_net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  #EDGE LAYER
+  edge:
+    build:
+      context: ./edge              
+      dockerfile: Dockerfile       
+    container_name: edge_node
+    ports:
+      - "5000:5000"
+    environment:
+      - FOG_URL=http://fog:5001/process_data
+    networks:
+      - iomt_net
+    depends_on:
+      fog:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  #SENSOR EMULATOR
+  simulator:
+    build:
+      context: ./sensors           
+      dockerfile: Dockerfile       
+    container_name: sensor_simulator
+    environment:
+      - EDGE_URL=http://edge:5000/send_data
+    volumes:
+      - ./sensors/dataset.csv:/app/dataset.csv
+    networks:
+      - iomt_net
+    depends_on:
+      edge:
+        condition: service_healthy
+    restart: "no"
+
+#NETWORK
+networks:
+  iomt_net:
+    driver: bridge
+
+#VOLUMES
+volumes:
+  fog_db:
