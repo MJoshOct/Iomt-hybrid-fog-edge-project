@@ -5,29 +5,21 @@ Please note:
 We have not implemented hardware but simulated the sensor behaviour. Docker was setup but not implemented as its use-case was not justified for goals of this project. Thus servers were made to run in local machines only. Regardless of presence of Docker files.
 
 Project flow:
-Sensor Emulator (patient data)
-        ↓
-Edge Server (Data Validation)
-        ↓
-Fog Node (Readying to send to database with access to cloud databse)
-        ↓
-SQLite Database
-        ↓
-Frontend Dashboard (monitor at fog layer and access from database in edge layer)
+Sensor Emulator (patient data) -> Edge Server (Data Validation) -> Fog Node (Readying to send to database with access to cloud databse) -> SQLite Database -> Frontend Dashboard (monitor at fog layer and access from database in edge layer)
 
 Different layers in which this project is divided into-
 
-  Edge/Server Layer:
+Edge/Server Layer:
 - Receives sensor data
 - Forwards to fog
 
-  Fog Layer:
+Fog Layer:
 - Processes data
 - Detects alerts
 - Stores in DB
 - Maintains live buffer
 
-  Cloud/UI Layer:
+Cloud/UI Layer:
 - Live monitoring (/live)
 - Historical analytics (/readings)
 
